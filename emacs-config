@@ -1,95 +1,124 @@
 
+;; Initialize package.el and add Melpa repository
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+(package-initialize)
+
+;; Ensure 'use-package' is installed
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+(eval-when-compile
+  (require 'use-package))
+
+;; UI settings
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (setq ring-bell-function 'ignore)
 (blink-cursor-mode 0)
-
 (setq make-backup-files nil)
 (setq auto-save-default nil)
-;; (setq custom-file null-device)
 (setq dired-listing-switches "-al --group-directories-first")
-
 (set-frame-font "Inconsolata 13" nil t)
 
-(setq explicit-shell-file-name "pwsh")
-(setq shell-file-name "pwsh")
+;; Evil mode
+(use-package evil
+  :ensure t
+  :config
+  (evil-mode t)
+  (define-key evil-emacs-state-map (kbd "<escape>") 'evil-normal-state)
+  (define-key evil-emacs-state-map (kbd "C-[") 'evil-normal-state)
+  (define-key evil-normal-state-map (kbd "C-r") 'undo-redo)
+  (define-key evil-normal-state-map (kbd "C-u") 'evil-scroll-up)
+  (define-key evil-normal-state-map (kbd "C-y") 'evil-scroll-line-up)
+  (define-key evil-normal-state-map (kbd "gc") 'comment-dwim)
+  (with-eval-after-load 'evil
+    (define-key evil-normal-state-map "K" nil)))
 
-(electric-pair-mode 1)
-(global-visual-line-mode 1)
-(show-paren-mode -1)
+(use-package evil-smartparens
+  :ensure t
+  :after evil
+  :config
+  (evil-smartparens-mode 1))
 
-(setq display-line-numbers-type 'relative)
-(setq-default display-line-numbers-width 3)
-(global-display-line-numbers-mode)
-(transient-mark-mode 1)
+;; Ivy
+(use-package ivy
+  :ensure t
+  :config
+  (ivy-mode t)
+  (setq ivy-count-format "(%d/%d) ")
+  (global-set-key (kbd "M-x") 'counsel-M-x)
+  (global-set-key (kbd "C-x C-f") 'counsel-find-file)
+  (global-set-key (kbd "C-x b") 'ivy-switch-buffer))
 
-(setq split-height-threshold 20)
-(setq split-width-threshold 80)
-(setq truncate-lines t)
+;; Highlight TODOs
+(use-package hl-todo
+  :ensure t
+  :config
+  (global-hl-todo-mode t))
 
-(setq c-basic-offset 4)
-(setq cpp-basic-offset 4)
+;; Tree-sitter
+(use-package tree-sitter
+  :ensure t)
 
-(setq-default indent-tabs-mode nil)
-(setq-default global-tab-width 4)
+(use-package tree-sitter-langs
+  :ensure t
+  :after tree-sitter)
 
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
-
-(require 'ivy)
-(setq ivy-count-format "(%d/%d) ")
-;; (global-set-key (kbd "C-s") 'swiper-isearch)
-(global-set-key (kbd "M-x") 'counsel-M-x)
-(global-set-key (kbd "C-x C-f") 'counsel-find-file)
-(global-set-key (kbd "C-x b") 'ivy-switch-buffer)
-(ivy-mode t)
-
-(require 'evil)
-(define-key evil-emacs-state-map (kbd "<escape>") 'evil-normal-state)
-(define-key evil-emacs-state-map (kbd "C-[") 'evil-normal-state)
-(define-key evil-normal-state-map (kbd "C-r") 'undo-redo)
-(define-key evil-normal-state-map (kbd "C-u") 'evil-scroll-up)
-(define-key evil-normal-state-map (kbd "C-y") 'evil-scroll-line-up)
-(define-key evil-normal-state-map (kbd "gc") 'comment-dwim)
-(evil-mode t)
-(with-eval-after-load 'evil
-  (define-key evil-normal-state-map "K" nil))
-
-(require 'evil-smartparens)
-(evil-smartparens-mode 1)
-
-(require 'hl-todo)
-(global-hl-todo-mode t)
-;;(global-hl-line-mode t)
-
-(require 'tree-sitter)
-(require 'tree-sitter-langs)
 (add-hook 'c-mode-hook #'tree-sitter-hl-mode)
 (add-hook 'c++-mode-hook #'tree-sitter-hl-mode)
 (add-hook 'python-mode-hook #'tree-sitter-hl-mode)
 (global-tree-sitter-mode t)
 (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
 
-;; python lsp
-(require 'elpy)
-(elpy-enable)
-(add-hook 'python-mode-hook 'elpy-mode)
-(add-hook 'python-mode-hook 'company-mode)
-(defun disable-highlight-indentation-in-elpy-mode ()
-  (when (and (boundp 'elpy-mode) elpy-mode)
-    (highlight-indentation-mode -1)))
-(add-hook 'elpy-mode-hook 'disable-highlight-indentation-in-elpy-mode)
+;; Elpy for Python development
+(use-package elpy
+  :ensure t
+  :config
+  (elpy-enable)
+  (add-hook 'python-mode-hook 'elpy-mode)
+  (add-hook 'python-mode-hook 'company-mode)
+  (defun disable-highlight-indentation-in-elpy-mode ()
+    (when (and (boundp 'elpy-mode) elpy-mode)
+      (highlight-indentation-mode -1)))
+  (add-hook 'elpy-mode-hook 'disable-highlight-indentation-in-elpy-mode))
 
-(add-hook 'lsp-mode-hook (lambda () (lsp-headerline-breadcrumb-mode -1)))
-(add-hook 'lsp-mode-hook (lambda () (company-mode 1)))
+;; Company mode
+(use-package company
+  :ensure t
+  :hook (lsp-mode . company-mode))
 
-(load-theme 'colonoscopy t)
- 
-;; Keybinds
+;; General settings
+(setq display-line-numbers-type 'relative)
+(setq-default display-line-numbers-width 3)
+(global-display-line-numbers-mode)
+(transient-mark-mode 1)
+(setq split-height-threshold 20)
+(setq split-width-threshold 80)
+(setq truncate-lines t)
+(setq c-basic-offset 4)
+(setq cpp-basic-offset 4)
+(setq-default indent-tabs-mode nil)
+(setq-default global-tab-width 4)
+(setq electric-pair-mode 1)
+(setq switch-to-buffer-preserve-window-point t)
+;; (global-visual-line-mode 1)
+(show-paren-mode -1)
+
+;; Keybindings
 (global-set-key (kbd "C-3") 'split-window-right)
-(global-set-key (kbd "C-7") 'other-window)
+(global-set-key (kbd "C-2") 'split-window-below)
 
-;; Unset Keybinds
+;; Unset Keybindings
+(defun my-evil-noop ()
+  "A function that does nothing."
+  (interactive))
 (global-unset-key (kbd "C-x C-b"))
+(global-unset-key (kbd "C-x C-k RET"))
+(global-unset-key (kbd "C-x f"))
+(define-key evil-normal-state-map (kbd "K") 'my-evil-noop)
 
+;; load-themes
+(load-theme 'colonoscopy t)

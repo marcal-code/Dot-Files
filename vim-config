@@ -1,0 +1,30 @@
+
+set belloff=all 
+set guioptions-=T
+set guioptions-=m
+set guioptions-=r
+set guifont=:h15
+set clipboard=unnamed
+
+set nobackup
+set noswapfile
+
+set shiftwidth=4
+set expandtab
+set softtabstop=4
+set backspace=indent,eol,start
+set autoindent
+set smartindent
+set termguicolors
+set nowrap
+
+set number relativenumber
+colorscheme PaperColor
+syntax on
+
+" KeyBinds
+let mapleader = "\<Space>"
+nnoremap <Leader>cc :set colorcolumn=80<cr>
+nnoremap <Leader>ncc :set colorcolumn-=80<cr>
+nnoremap <Leader>spr :vsp<cr>
+nnoremap <Leader>spd :split<cr>

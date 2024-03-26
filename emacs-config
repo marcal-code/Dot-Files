@@ -21,7 +21,8 @@
 (setq make-backup-files nil)
 (setq auto-save-default nil)
 (setq dired-listing-switches "-al --group-directories-first")
-(set-frame-font "Inconsolata 13" nil t)
+;; (set-frame-font "Inconsolata 16" nil t)
+(set-frame-font "Consolas 16" nil t)
 
 ;; Evil mode
 (use-package evil
@@ -58,6 +59,12 @@
   :ensure t
   :config
   (global-hl-todo-mode t))
+
+;; Highlight TODOs
+(use-package hl-todo
+  :ensure t
+  :config
+  (global-hl-line-mode t))
 
 ;; Tree-sitter
 (use-package tree-sitter
@@ -102,8 +109,9 @@
 (setq cpp-basic-offset 4)
 (setq-default indent-tabs-mode nil)
 (setq-default global-tab-width 4)
-(setq electric-pair-mode 1)
+(electric-pair-mode t)
 (setq switch-to-buffer-preserve-window-point t)
+(setq-default truncate-lines t)
 ;; (global-visual-line-mode 1)
 (show-paren-mode -1)
 
@@ -121,4 +129,5 @@
 (define-key evil-normal-state-map (kbd "K") 'my-evil-noop)
 
 ;; load-themes
-(load-theme 'colonoscopy t)
+(load-theme 'junio t)
+
